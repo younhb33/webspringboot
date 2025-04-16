@@ -95,61 +95,75 @@ public class main_controller {
 	}
 	
 	
-	// CDN 서버로 이미지 및 컨텐츠 파일 전송 메소드
-	@PostMapping("/cdn_uploadok.do")
-	public String cdn_server(@RequestParam(defaultValue = "", name = "mfile") MultipartFile mfile) {
-		this.log.info(mfile.getOriginalFilename());
-
-		// FTP 서버에 접속하는 역할을 하는 라이브러리 호출
-		FTPClient ftp = new FTPClient(); // CDN 서버 연결
-		ftp.setControlEncoding("utf-8"); // CDN 연결시 파일 전송 언어셋
-		FTPClientConfig cf = new FTPClientConfig(); // FTP 접속 클라이언트 객체 생성
-
-		try {
-			String filenm = mfile.getOriginalFilename(); // front-end가 전송한 파일명을 저장
-			//String host = "koona0.dothome.co.kr";	//CDN 접속 url 
-			String host = "kbsn.or.kr"; // CDN 접속 url
-
-			// FTP 정보
-			//String user = "younhb33";
-			String user = "testuser";
-			//String pass = "y13572468you!";
-			String pass = "a10041004!";
-			int port = 22; // ftp 접속 포트번호 : 21, sftp 기본포드 : 22
-
-			ftp.configure(cf);
-			ftp.connect(host, port);
-
-			if (ftp.login(user, pass)) { // FTP 사용자가 맞을 경우
-				// BINARY_FILE_TYPE : 이미지, 동영상, PDF, XLS
-				// ASCII_FILE_TYPE : 텍스트 문서 (txt, html, js, css)
-				ftp.setFileType(FTP.BINARY_FILE_TYPE); // 파일형태 : binary, ascii
-				int result = ftp.getReplyCode(); // CDN 서버에서 파일 업로드시 지연사항을 확인
-				this.log.info("지연코드 : " + result);
-				//Server 경로에 해당 파일을 업로드시 byte단위로 전송을 하게됨
-				boolean ok = ftp.storeFile("/cdn_upload/" + filenm, mfile.getInputStream());
-
-				if (ok == true) {
-					this.log.info("업로드 완료!!");
-				} else {
-					this.log.info("파일 전송중 오류 발생");
-				}
-
-			} else { // 로그인 실패
-				this.log.info("ftp 정보가 올바르지 않아 CDN 서버에 접근 실패하였습니다.");
-			}
-
-		} catch (Exception e) {
-			this.log.info(e.toString());
-		} finally {
-			try {
-				ftp.disconnect(); // ftp 접속을 종료
-			} catch (Exception e) {
-			}
-		}
-
-		return null;
-	}
+	//CDN 서버로 이미지 및 컨텐츠 파일 전송 메소드 
+	 	@PostMapping("/cdn_uploadok.do")
+	 	public String cdn_server(@RequestParam(defaultValue = "", name="mfile") MultipartFile mfile) {
+	 		this.log.info(mfile.getOriginalFilename());
+	 		
+	 		//FTP 서버에 접속하는 역할을 하는 라이브러리 호출 
+	 		FTPClient ftp = new FTPClient();				//CDN 서버 연결 
+	 		ftp.setControlEncoding("utf-8");				//CDN 연결시 파일 전송 언어셋 
+	 		FTPClientConfig cf = new FTPClientConfig();		//FTP 접속 클라이언트 객체 생성 
+	 		
+	 		try {
+	 			String filenm = mfile.getOriginalFilename();	//front-end가 전송한 파일명을 저장
+	 			//			String host = "younhb33.dothome.co.kr";	//CDN 접속 url 
+	 			String host = "kbsn.or.kr";	//CDN 접속 url 
+	 			
+	 			//FTP 정보
+	 			//			String user = "younhb33";
+	 			String user = "testuser";
+	 			//			String pass = "y13572468you!";
+	 			String pass = "a10041004!";
+	 			int port = 22;				//ftp 접속 포트번호 21, sftp 기본포트 22
+	 			
+	 			ftp.configure(cf);
+	 			ftp.connect(host,port);
+	 			
+	 			if(ftp.login(user, pass)) {	//FTP 사용자가 맞을 경우
+	 				//BINARY_FILE_TYPE : 이미지, 동영상, PDF, XLS
+	 				//ASCII_FILE_TYPE : 텍스트 문서 (txt, html, js, css)
+	 				ftp.setFileType(FTP.BINARY_FILE_TYPE);		//파일형태 : binary, ascii 
+	 				int result = ftp.getReplyCode();			//CDN 서버에서 파일 업로드시 지연사항을 확인
+	 				this.log.info("지연코드 : " + result);			//200 이면 정상 404나 500이면 오류 
+	 				
+	 				//서버 경로에 해당 파일을 업로드시 바이트단위로 전송하게됨 
+	 				boolean ok = ftp.storeFile("/cdn_upload/"+filenm, mfile.getInputStream());
+	 				
+	 				if(ok == true) {
+	 					this.log.info("업로드 완료");
+	 				}else {
+	 					this.log.info("파일 전송중 오류 발생");
+	 				}
+	 				/*
+	 				  Server (localhost)
+	 				  Java, Spring, Database, Spring-boot
+	 				 
+	 				  Server (Cloud Server)
+	 				  Java, Spring, Database, Spring-boot
+	 				  + Server에 대한 구조 및 FTP, SSH, SFTP
+	 				  - Web Server
+	 				  - Database Server
+	 				  - CDN Server
+	 				  - Mail Server
+	 				  - Name Server
+	 				  - Proxy Server
+	 				 */
+	 				
+	 			}else {		//로그인 실패 
+	 				this.log.info("ftp 정보가 올바르지 않아 CDN 서버에 접근 실패하였습니다.");
+	 			}
+	 		}catch (Exception e) {
+	 			this.log.info(e.toString());
+	 		}finally {
+	 			try {
+	 				ftp.disconnect();	//ftp 접속을 종료 
+	 			}catch (Exception e) {
+	 			}
+	 		}
+	 		
+	 		return null;
+	 	}
 	
 	
 	

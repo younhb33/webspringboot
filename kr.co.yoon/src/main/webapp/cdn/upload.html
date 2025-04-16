@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>파일 전송 FTP</title>
+</head>
+<body>
+
+<form id="frm" method="post" action="./cdn_fileok.do" enctype="multipart/form-data">
+<input type="hidden" name="url" value="kbsn.or.kr">
+파일첨부 : <input type="file" name="mfile"><br>
+<button type="button" id="btn">CDN 파일 업로드</button>
+</form>
+
+</body>
+<script>
+document.querySelector("#btn").addEventListener("click",function(){
+	if(frm.mfile.value==""){
+		alert("파일을 첨부해주세요");
+	}else{
+		var mb = 1024 * 1024 * 2;		//2메가바이트 
+		var fileck = frm.mfile.files[0].size;	//멀티파일일경우 반복문 필요 
+		console.log(fileck);
+		
+		if(mb < fileck){
+			alert("파일 첨부는 최대 2MB 이하로 해주세요");
+			frm.mfile.value="";
+			
+		}else{
+			var types = frm.mfile.files[0].type;
+			if(types!="image/png" && types!="image/jpg" && types!="image/jpeg" && types!="image/bmp" && types!="image/webp"){
+				alert("파일 첨부는 이미지파일만 첨부해주세요");
+			}else{
+				frm.submit();
+			}
+		}
+	}
+});
+
+</script>
+</html>
